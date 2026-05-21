@@ -1,0 +1,129 @@
+# Game Bible: A Cat in Girls’ Dormitory
+
+**Genre:** Adult Ecchi / NSFW Dating Sim Visual Novel (Cat Protagonist)  
+**Engine:** Custom C + SDL2 VN Engine (PC-98 retro aesthetic)  
+**Target Audience:** 18+  
+**Version:** 1.0 (Cleaned & Optimized)
+
+## Core Fantasy
+
+You play as **Tama** (customizable name), a stray cat adopted into **Sakura Heights**, an old, charming all-girls dormitory.  
+Through cat-like actions, exploration, and adapting to each girl’s personality, you build deep affection and increasingly explicit relationships.
+
+The game heavily emphasizes **room-based exploration**, personality-driven gameplay, and voyeuristic cat POV.
+
+---
+
+## Story Opening (Prologue)
+
+On a rainy night, a soaked stray cat takes shelter in front of Sakura Heights dormitory.  
+The next morning, Himari finds the cat, brings him inside, cleans and dries him.
+
+**Tutorial Interaction (Cat POV):**
+- The player (as cat) scratches Himari while she tries to pet him.
+- She puts the cat on her lap anyway, gives him the name **Tama**, and explains the rules.
+- She teaches the core gameplay loop:  
+  > “Every girl is different. Watch them carefully, understand their personality, and act accordingly to gain their affection.”
+
+This scene serves as the **game tutorial**.
+
+---
+
+## Gameplay Systems
+
+### Time System
+Each day is divided into **5 phases**:
+- Morning
+- Noon
+- Afternoon
+- Evening
+- Night
+
+### Movement & Rooms
+- From the central corridor/lounge, the player chooses which room to visit.
+- Rooms can be single or double occupancy.
+- The game is designed for easy expansion — new rooms and girls can be added modularly.
+
+### Affection System
+- Each girl has her own **Affection** value (0–120).
+- Affection is displayed on the right side of the screen (Name + Room Number + Heart Bar).
+- Actions give + or – points depending on how well they match the girl’s personality.
+
+### Night Restrictions
+- **≥20 Affection**: Allowed to enter room at night (sleep, cuddle, watch changing, etc.).
+- **≥40 Affection**: Can stay for more explicit night scenes (masturbation watching/participation).
+
+### Lewd Progression (NSFW)
+- **50+ Affection**: Can join shower scenes.
+- **70+ Affection**: Can stay during masturbation scenes.
+- **100+ Affection**: The girl offers a **collar**. Accepting it locks you into her route and triggers her **personal ending**.
+
+**Important:** All scenes should be written and illustrated as suggestive, ecchi, or fully NSFW depending on context. Character sprites must include **underwear and nude variants**.
+
+### Special Story Elements
+- Some storylines involve the girl being on her **period** or **ovulating** (higher lewd potential).
+- Trans-feminine characters are supported in single rooms.
+
+---
+
+## Content Scope (Realistic & Sustainable)
+
+**Per Girl:**
+- 80-100 unique story segments total
+- 15-20 segments per time of day (Morning/Noon/Afternoon/Evening/Night)
+- 4–5 dedicated Ending scenes
+
+This provides excellent variety while remaining achievable.
+
+---
+
+## Folder Structure (Auto-Detect Friendly)
+
+```txt
+assets/
+├── characters/
+│   ├── Himari/
+│   │   ├── sprites/          # happy, angry, blush, underwear, nude, etc.
+│   │   ├── scenes/           # CGs and story images
+│   │   ├── scripts/
+│   │   │   ├── morning.txt
+│   │   │   ├── noon.txt
+│   │   │   ├── afternoon.txt
+│   │   │   ├── evening.txt
+│   │   │   ├── night.txt
+│   │   │   └── ending.txt
+│   │   └── data.json         # personality, difficulty, color, etc.
+│   └── Reika/
+│       └── ... (same structure)
+└── dorm/
+    └── rooms.json            # Master dormitory layout
+
+
+
+----
+
+
+Technical Requirements
+
+Auto-detection system for characters and rooms.
+Strong debug logging (console output for loaded scripts, missing files, variable changes, etc.).
+MVC architecture friendly.
+Modular script loading per room + time of day.
+NO multiple sprite rendering, always only one character showing on screen and talking.
+
+
+
+Tone & Style
+
+Playful, mischievous, shamelessly ecchi.
+Heavy use of cat POV angles (low ground, looking up).
+Retro PC-98 visual style with retro lewd artwork.
+All interactions are cat actions only (no spoken dialogue from the player).
+
+
+
+Expansion Philosophy
+The entire game is built for easy modular expansion:
+
+Adding a new girl = create folder + files + add to rooms.json
+Game automatically detects and integrates the new character.

@@ -1,0 +1,198 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.wrap{display:flex;gap:16px;padding:1rem 0}
+.panel{width:220px;flex-shrink:0;display:flex;flex-direction:column;gap:10px;overflow-y:auto;padding-right:4px;max-height:900px}
+.sec{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px;display:flex;flex-direction:column;gap:7px}
+.sec-title{font-size:11px;font-weight:500;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.06em}
+label{font-size:12px;color:var(--color-text-secondary);display:flex;flex-direction:column;gap:3px}
+input[type=color]{width:100%;height:26px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);cursor:pointer;padding:2px;background:var(--color-background-primary)}
+input[type=range]{width:100%}
+input[type=number]{width:100%;padding:3px 7px;font-size:12px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary)}
+.row{display:flex;gap:6px}
+.row label{flex:1}
+.sides{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+button{width:100%;padding:7px;font-size:13px;font-weight:500;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:transparent;color:var(--color-text-primary);cursor:pointer}
+button:hover{background:var(--color-background-secondary)}
+</style>
+
+<div class="wrap">
+  <div class="panel">
+
+    <div class="sec">
+      <div class="sec-title">background</div>
+      <label>image<input type="file" id="bgFile" accept="image/*" style="font-size:11px"></label>
+      <label>fallback color<input type="color" id="bgColor" value="#2a1a2e"></label>
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">window border</div>
+      <label>width<input type="range" id="borderW" min="0" max="60" value="20" step="1"></label>
+      <label>opacity<input type="range" id="wOpacity" min="0" max="100" value="100" step="1"></label>
+      <div class="sides">
+        <label>top<input type="color" id="wTop" value="#c47a7a"></label>
+        <label>right<input type="color" id="wRight" value="#8b4a4a"></label>
+        <label>bottom<input type="color" id="wBottom" value="#8b4a4a"></label>
+        <label>left<input type="color" id="wLeft" value="#c47a7a"></label>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">scene box</div>
+      <div class="row">
+        <label>x<input type="number" id="sx" value="30"></label>
+        <label>y<input type="number" id="sy" value="30"></label>
+      </div>
+      <div class="row">
+        <label>w<input type="number" id="sw" value="580"></label>
+        <label>h<input type="number" id="sh" value="300"></label>
+      </div>
+      <label>border width<input type="range" id="sBW" min="0" max="20" value="3" step="1"></label>
+      <label>border opacity<input type="range" id="sOpacity" min="0" max="100" value="100" step="1"></label>
+      <div class="sides">
+        <label>top<input type="color" id="sTop" value="#c47a7a"></label>
+        <label>right<input type="color" id="sRight" value="#8b4a4a"></label>
+        <label>bottom<input type="color" id="sBottom" value="#8b4a4a"></label>
+        <label>left<input type="color" id="sLeft" value="#c47a7a"></label>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">text box</div>
+      <div class="row">
+        <label>x<input type="number" id="tx" value="50"></label>
+        <label>y<input type="number" id="ty" value="366"></label>
+      </div>
+      <div class="row">
+        <label>w<input type="number" id="tw" value="540"></label>
+        <label>h<input type="number" id="th" value="80"></label>
+      </div>
+      <label>fill<input type="color" id="boxFill" value="#ffffff"></label>
+      <label>fill opacity<input type="range" id="boxAlpha" min="0" max="100" value="100" step="1"></label>
+      <label>border width<input type="range" id="bBW" min="0" max="20" value="2" step="1"></label>
+      <label>border opacity<input type="range" id="bOpacity" min="0" max="100" value="100" step="1"></label>
+      <div class="sides">
+        <label>top<input type="color" id="bTop" value="#c47a7a"></label>
+        <label>right<input type="color" id="bRight" value="#8b4a4a"></label>
+        <label>bottom<input type="color" id="bBottom" value="#8b4a4a"></label>
+        <label>left<input type="color" id="bLeft" value="#c47a7a"></label>
+      </div>
+    </div>
+
+    <button id="exportBtn">export PNG (640×480) ↗</button>
+
+  </div>
+
+  <div style="flex:1">
+    <canvas id="c" width="640" height="480" style="width:100%;max-width:640px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);display:block"></canvas>
+  </div>
+</div>
+
+<script>
+const c = document.getElementById('c');
+const ctx = c.getContext('2d');
+let bgImg = null;
+
+function g(id){ return document.getElementById(id).value; }
+
+function hex2rgba(hex, alpha) {
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+function withOpacity(hex, opacity) {
+  return hex2rgba(hex, opacity / 100);
+}
+
+function drawCSSBorderInward(ct, x, y, w, h, bw, opacity, top, right, bottom, left) {
+  if(bw <= 0) return;
+  ct.fillStyle = withOpacity(top, opacity);
+  ct.beginPath(); ct.moveTo(x,y); ct.lineTo(x+w,y); ct.lineTo(x+w-bw,y+bw); ct.lineTo(x+bw,y+bw); ct.closePath(); ct.fill();
+  ct.fillStyle = withOpacity(bottom, opacity);
+  ct.beginPath(); ct.moveTo(x,y+h); ct.lineTo(x+w,y+h); ct.lineTo(x+w-bw,y+h-bw); ct.lineTo(x+bw,y+h-bw); ct.closePath(); ct.fill();
+  ct.fillStyle = withOpacity(left, opacity);
+  ct.beginPath(); ct.moveTo(x,y); ct.lineTo(x,y+h); ct.lineTo(x+bw,y+h-bw); ct.lineTo(x+bw,y+bw); ct.closePath(); ct.fill();
+  ct.fillStyle = withOpacity(right, opacity);
+  ct.beginPath(); ct.moveTo(x+w,y); ct.lineTo(x+w,y+h); ct.lineTo(x+w-bw,y+h-bw); ct.lineTo(x+w-bw,y+bw); ct.closePath(); ct.fill();
+}
+
+function drawCSSBorderOutward(ct, x, y, w, h, bw, opacity, top, right, bottom, left) {
+  if(bw <= 0) return;
+  ct.fillStyle = withOpacity(top, opacity);
+  ct.beginPath(); ct.moveTo(x,y); ct.lineTo(x+w,y); ct.lineTo(x+w+bw,y-bw); ct.lineTo(x-bw,y-bw); ct.closePath(); ct.fill();
+  ct.fillStyle = withOpacity(bottom, opacity);
+  ct.beginPath(); ct.moveTo(x,y+h); ct.lineTo(x+w,y+h); ct.lineTo(x+w+bw,y+h+bw); ct.lineTo(x-bw,y+h+bw); ct.closePath(); ct.fill();
+  ct.fillStyle = withOpacity(left, opacity);
+  ct.beginPath(); ct.moveTo(x,y); ct.lineTo(x,y+h); ct.lineTo(x-bw,y+h+bw); ct.lineTo(x-bw,y-bw); ct.closePath(); ct.fill();
+  ct.fillStyle = withOpacity(right, opacity);
+  ct.beginPath(); ct.moveTo(x+w,y); ct.lineTo(x+w,y+h); ct.lineTo(x+w+bw,y+h+bw); ct.lineTo(x+w+bw,y-bw); ct.closePath(); ct.fill();
+}
+
+function draw(targetCtx) {
+  const ct = targetCtx || ctx;
+  const W=640, H=480;
+  ct.clearRect(0,0,W,H);
+
+  if(bgImg){ ct.drawImage(bgImg,0,0,W,H); }
+  else { ct.fillStyle = g('bgColor'); ct.fillRect(0,0,W,H); }
+
+  drawCSSBorderInward(ct, 0, 0, W, H, +g('borderW'), +g('wOpacity'),
+    g('wTop'), g('wRight'), g('wBottom'), g('wLeft'));
+
+  const sx=+g('sx'), sy=+g('sy'), sw=+g('sw'), sh=+g('sh'), sBW=+g('sBW');
+  drawCSSBorderOutward(ct, sx, sy, sw, sh, sBW, +g('sOpacity'),
+    g('sTop'), g('sRight'), g('sBottom'), g('sLeft'));
+
+  if(targetCtx){
+    ct.clearRect(sx, sy, sw, sh);
+  } else {
+    ct.fillStyle='rgba(255,255,255,0.07)';
+    ct.fillRect(sx,sy,sw,sh);
+    ct.setLineDash([6,4]);
+    ct.strokeStyle='rgba(255,255,255,0.2)';
+    ct.lineWidth=1;
+    ct.strokeRect(sx,sy,sw,sh);
+    ct.setLineDash([]);
+    ct.fillStyle='rgba(255,255,255,0.35)';
+    ct.font='13px sans-serif';
+    ct.textAlign='center';
+    ct.fillText('scene image goes here', sx+sw/2, sy+sh/2);
+    ct.textAlign='left';
+  }
+
+  const tx=+g('tx'), ty=+g('ty'), tw=+g('tw'), th=+g('th'), bBW=+g('bBW');
+  ct.fillStyle = hex2rgba(g('boxFill'), +g('boxAlpha')/100);
+  ct.fillRect(tx, ty, tw, th);
+  drawCSSBorderOutward(ct, tx, ty, tw, th, bBW, +g('bOpacity'),
+    g('bTop'), g('bRight'), g('bBottom'), g('bLeft'));
+
+  if(!targetCtx){
+    ct.fillStyle='rgba(60,30,30,0.5)';
+    ct.font='12px sans-serif';
+    ct.fillText('[Speaker] dialogue text appears here...', tx+14, ty+th/2+5);
+  }
+}
+
+document.getElementById('bgFile').addEventListener('change', e => {
+  const file = e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => { const img = new Image(); img.onload = () => { bgImg=img; draw(); }; img.src=ev.target.result; };
+  reader.readAsDataURL(file);
+});
+
+document.querySelectorAll('input:not(#bgFile)').forEach(el => el.addEventListener('input', () => draw()));
+
+document.getElementById('exportBtn').addEventListener('click', () => {
+  const ec = document.createElement('canvas');
+  ec.width=640; ec.height=480;
+  draw(ec.getContext('2d'));
+  const link = document.createElement('a');
+  link.download='windowbg.avif';
+  link.href=ec.toDataURL('image/png');
+  link.click();
+});
+
+draw();
+</script>

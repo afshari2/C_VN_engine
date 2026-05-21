@@ -1,0 +1,11 @@
+# story.txt
+# Lines starting with @ swap the scene image (file lives in assets/images/)
+# Everything else is dialogue shown in the text box.
+
+@scene02.bmp
+[Amy] Heyyy! long time no see...
+[Amy] I was wondering when you'd show up. But I'm just trying to understand what's going on if I make a long text... I don't know like broooooo
+
+@scene.bmp
+[Narrator] She smiles, tucking a strand of hair behind her ear.
+[Amy] So... are you staying this time?

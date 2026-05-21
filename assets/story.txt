@@ -1,0 +1,205 @@
+SET hinata_affection 0
+SET courage 0
+BG assets/black.avif
+SAYN Are you above 18 years old?
+CHOICE
+OPTION Yes, I'm an adult -> intro
+OPTION No -> minor
+ENDCHOICE
+
+
+
+LABEL intro
+BG assets/backgrounds/cat_front_of_dorm_raining.jpeg
+SAYN Cold rain pours down on a stray cat. You huddle under the tiny overhang of Sakura Heights, an old all-girls dormitory.
+SAYN Your fur is drenched. Hunger burns. You wait... hoping for warmth.
+BG assets/black.avif
+SAYN The night feels endless.
+BG assets/dorm_enterance_morning.jpeg
+SPRITE assets/hinata_surprised.avif center
+SAY Hinata Oh no... Were you out here all night, little one?
+SPRITE assets/hinata_smile.avif center
+SAYN A kind girl with soft pink hair and gentle eyes kneels. Her cardigan hangs loosely, giving you a clear view down her cleavage as she leans in.
+SAY Hinata Come here, sweetie. I won't hurt you.
+SPRITE assets/hinata_hold_tama.avif center
+SAY Hinata Don't worry... You're safe now. With me.
+ADD hinata_affection 20
+SAYN She lifts you into her warm arms. Her breasts press softly against your body. She smells like cherry blossoms and warm skin.
+
+LABEL tutorial_start
+BG assets/backgrounds/room_interior.png
+SPRITE assets/Same_girl,_gentle_happy_smile,_202605211448.jpeg center
+SAY Hinata This is my room, 201. Let's get you cleaned up, okay Tama?
+SAYN She places you on her bed. The room is filled with her feminine scent.
+SPRITE assets/Cute_20-year-old_Japanese_girl_with_202605211449.jpeg center
+SAYN Hinata bends over to fill a basin. Her short pleated skirt rides high, showing the full curve of her plump ass in white cotton panties.
+SAYN Your tail twitches.
+
+CHOICE
+OPTION Rub against her leg lovingly -> tutorial_affection
+OPTION Playfully scratch her hand -> tutorial_scratch
+OPTION Sneak under her skirt for a closer look -> tutorial_peek
+OPTION Jump down and explore -> tutorial_explore
+ENDCHOICE
+
+LABEL tutorial_affection
+ADD hinata_affection 15
+SPRITE assets/hinata_smile.avif center
+SAY Hinata Aww, you're such an affectionate boy~ *giggles happily*
+GOTO tutorial_name
+
+LABEL tutorial_scratch
+ADD hinata_affection 5
+SPRITE assets/hinata_surprised.avif center
+SAY Hinata Ow! Cheeky kitty! *she still smiles and pulls you close*
+GOTO tutorial_name
+
+LABEL tutorial_peek
+ADD courage 12
+SPRITE assets/hinata_surprised.avif center
+SAYN You dart between her thighs. The warm scent of her pussy is strong through the thin fabric. A small wet spot is visible.
+SAY Hinata H-hey! Naughty Tama! *her voice is embarrassed but amused*
+ADD hinata_affection 10
+GOTO tutorial_name
+
+LABEL tutorial_explore
+ADD courage 8
+SPRITE assets/hinata_smile.avif center
+SAYN You sniff around and find a pair of her used panties near the laundry. They still carry her scent.
+SAY Hinata Come back here, silly~ *she scoops you up, pressing your face into her soft chest*
+ADD hinata_affection 12
+GOTO tutorial_name
+
+LABEL tutorial_name
+BG assets/backgrounds/room_interior.png
+SPRITE assets/hinata_hold_tama.avif center
+SAY Hinata You need a name... Tama. It suits you perfectly.
+SAY Hinata There are many girls here. Some will adore you, others might get angry if you're too bold. Watch them. Learn their weaknesses.
+SAY Hinata Be a clever kitty if you want to stay with me forever.
+
+CHOICE
+OPTION Purr deeply while nuzzling between her breasts -> tutorial_purr
+OPTION Gently paw at her chest -> tutorial_paw
+OPTION Lick her neck seductively -> tutorial_lick
+OPTION Stay still and enjoy her warmth -> tutorial_still
+ENDCHOICE
+
+LABEL tutorial_purr
+ADD hinata_affection 22
+SPRITE assets/hinata_surprised.avif center
+SAY Hinata Mmm... your purring feels so good against me... *she hugs you tighter*
+GOTO first_night
+
+LABEL tutorial_paw
+ADD hinata_affection 15
+SPRITE assets/hinata_surprised.avif center
+SAY Hinata H-hey... that's my breast... *she bites her lip but doesn't remove your paw*
+GOTO first_night
+
+LABEL tutorial_lick
+ADD hinata_affection 18
+SPRITE assets/hinata_surprised.avif center
+SAY Hinata Ah~ Your tongue is rough... but I like it. *she shivers*
+GOTO first_night
+
+LABEL tutorial_still
+ADD hinata_affection 12
+SPRITE assets/Same_girl,_gentle_happy_smile,_202605211448.jpeg center
+SAY Hinata Good boy... Just relax with me.
+GOTO first_night
+
+LABEL first_night
+BG assets/backgrounds/cozy_bed.png
+SPRITE assets/hinata_smile.avif center
+SAY Hinata It's late... You can sleep with me tonight, Tama.
+SAYN She changes in front of you. Her tank top is thin and her shorts are tiny, barely covering her ass cheeks.
+SPRITE assets/hinata_hold_tama.avif center
+SAYN As she bends to fold her clothes you get a perfect upskirt view of her panties clinging to her pussy.
+
+CHOICE
+OPTION Curl up between her soft breasts -> night_breasts
+OPTION Slip under the blanket near her thighs -> night_thighs
+OPTION Sit at the foot of the bed and watch her -> night_watch
+OPTION Lick her skin while she sleeps -> night_lick
+ENDCHOICE
+
+LABEL night_breasts
+ADD hinata_affection 25
+SPRITE assets/hinata_hold_tama.avif center
+SAYN You bury yourself in the warm valley of her breasts. They rise and fall with every breath.
+GOTO morning_after
+
+LABEL night_thighs
+ADD hinata_affection 23
+SPRITE assets/hinata_hold_tama.avif center
+SAYN You slide under the blanket and press against her warm inner thighs. Her pussy radiates heat just inches from your nose.
+GOTO morning_after
+
+LABEL night_watch
+ADD courage 15
+SPRITE assets/hinata_smile.avif center
+SAYN Her tank top rides up. You can see her pink nipples and the outline of her pussy through her shorts.
+GOTO morning_after
+
+LABEL night_lick
+ADD hinata_affection 20
+SPRITE assets/hinata_hold_tama.avif center
+SAYN You gently lick her inner thigh, slowly moving higher until you taste the edge of her panties.
+SAY Hinata Mmmhh... *she moans softly in her sleep and spreads her legs slightly*
+GOTO morning_after
+
+LABEL morning_after
+BG assets/backgrounds/cozy_bed.png
+SPRITE assets/hinata_smile.avif center
+SAY Hinata *stretches* Nnnh~ Good morning, Tama.
+SAYN Her tank top lifts completely, exposing both breasts and hard nipples for several seconds.
+SPRITE assets/hinata_smile.avif center
+SAY Hinata I have morning classes, but you can explore the dorm. Just behave... mostly~ *she winks*
+REDUCE hinata_affection 1
+SAYN She gives you one last loving pet before leaving.
+
+LABEL corridor_hub_day1
+BG assets/backgrounds/hallway.png
+SPRITE assets/sprites/cat_hero.png center
+SAYN You're back in the long corridor of Sakura Heights. Many doors, many girls, many opportunities for a perverted cat.
+SAYN Where should you go?
+
+CHOICE
+OPTION Return to Hinata's room (201) -> room_201_hinata
+OPTION Visit Room 203 (Yumi & Mio) -> room_203_shared
+OPTION Go to the Rooftop -> common_rooftop
+OPTION Sneak into the Shared Bath -> common_bath
+ENDCHOICE
+
+LABEL room_201_hinata
+BG assets/backgrounds/room_interior.png
+SPRITE assets/hinata_smile.avif center
+SAY Hinata Back so soon? Did my cute Tama miss me already?
+# More Hinata content will be added later
+GOTO corridor_hub_day1
+
+LABEL room_203_shared
+BG assets/backgrounds/room_interior.png
+SPRITE assets/sprites/emi_smile.png center
+SAYN Two girls are chatting. One looks very energetic with twin tails, the other more shy and bookish.
+# Yumi & Mio content ready for next expansion
+GOTO corridor_hub_day1
+
+LABEL common_rooftop
+BG assets/backgrounds/lounge.png
+SAYN The rooftop is sunny and quiet. Perfect for sunbathing... or spying on open windows.
+GOTO corridor_hub_day1
+
+LABEL common_bath
+BG assets/backgrounds/hallway.png
+SPRITE assets/sprites/cat_hero.png center
+SAYN You hear water running and soft humming. Steam escapes from under the door.
+SAYN A curious cat could easily sneak in...
+GOTO corridor_hub_day1
+
+END
+
+
+LABEL minor
+SAYN This game is strictly for adults 18+. Please come back when you're older.
+END

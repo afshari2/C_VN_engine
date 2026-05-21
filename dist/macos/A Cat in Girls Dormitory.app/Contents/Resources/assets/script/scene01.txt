@@ -1,0 +1,75 @@
+# scene01.txt — A Cat in a Girls' Dormitory
+# Story: A stray cat sneaks into a cozy dormitory and meets its residents.
+
+SET emi_affection 0
+SET sara_affection 0
+
+BG assets/backgrounds/dorm_entrance.png
+SPRITE assets/sprites/cat_hero.png center
+
+SAY Narrator It was a cold, rainy evening when you first saw the golden light spilling from the dormitory window.
+SAY Narrator You're just a small, hungry stray, but the smell of grilled salmon is calling your name.
+
+BG assets/backgrounds/hallway.png
+SAY Narrator You slip through a cracked door. The hallway is warm and smells like vanilla and old books.
+
+BG assets/backgrounds/lounge.png
+SPRITE assets/sprites/emi_surprised.png center
+SAY Emi Eek! A... a cat? Where did you come from?
+SAY Emi Oh, you're soaking wet! You poor little thing.
+
+SPRITE assets/sprites/emi_smile.png center
+SAY Emi Hold on, I think I have some treats in my bag.
+SAY Narrator The girl named Emi reaches into her backpack, her eyes sparkling with kindness.
+
+BG assets/backgrounds/room_interior.png
+SPRITE assets/sprites/sara_stern.png center
+SAY Sara Emi! What did I say about bringing "guests" into the room?
+SAY Emi But Sara, look at him! He's tiny! And he's shivering!
+
+CHOICE
+OPTION Pad over to Emi -> emi_route
+OPTION Sit politely in front of Sara -> sara_route
+ENDCHOICE
+
+LABEL emi_route
+ADD emi_affection 1
+SPRITE assets/sprites/emi_smile.png center
+SAY Emi Aww, you chose me? Okay, okay, one treat. Maybe two.
+SAY Narrator Emi hides her grin behind her sleeve as you bump your head against her hand.
+GOTO common_evening
+
+LABEL sara_route
+ADD sara_affection 1
+SPRITE assets/sprites/sara_soft.png center
+SAY Sara ...You understand manners better than most people in this dorm.
+SAY Narrator Sara sighs, but her hand is already reaching down to scratch behind your ears.
+GOTO common_evening
+
+LABEL common_evening
+BG assets/backgrounds/cozy_bed.png
+SPRITE assets/sprites/cat_hero.png center
+SAY Narrator Curled up on a soft blanket, you purr loudly. The dormitory life might not be so bad after all.
+SAY Narrator Later that night, the dorm grows quiet, and someone checks on you one last time.
+
+IF emi_affection >= 1 GOTO emi_night
+IF sara_affection >= 1 GOTO sara_night
+GOTO neutral_night
+
+LABEL emi_night
+SPRITE assets/sprites/emi_smile.png center
+SAY Emi I knew you'd pick the warmest blanket. Tomorrow, I'll find you a proper collar.
+GOTO ending
+
+LABEL sara_night
+SPRITE assets/sprites/sara_soft.png center
+SAY Sara You are still temporary. But... I placed a towel by the heater, just in case.
+GOTO ending
+
+LABEL neutral_night
+SAY Narrator Nobody says it out loud, but the room feels a little warmer with you in it.
+
+LABEL ending
+SAY Narrator Your first night in the dormitory ends, and a new routine quietly begins.
+
+END
