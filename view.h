@@ -7,25 +7,29 @@
 #include <stdbool.h>
 #include "model.h"
 
-#define WIN_W            640
-#define WIN_H            480
-#define SCENE_X          30
-#define SCENE_Y          30
-#define SCENE_W          580
-#define SCENE_H          326
-#define BOX_X            50
-#define BOX_Y            366
-#define BOX_W            540
-#define BOX_H            80
-#define TEXT_PAD_X       10
-#define TEXT_PAD_Y       10
-#define HEART_SIZE       30
-#define HEART_MARGIN     8
+#define UI_SCALE_NUM     9
+#define UI_SCALE_DEN     4
+#define UI_SCALE(v)      (((v) * UI_SCALE_NUM + UI_SCALE_DEN / 2) / UI_SCALE_DEN)
+
+#define WIN_W            1440
+#define WIN_H            1080
+#define SCENE_X          UI_SCALE(30)
+#define SCENE_Y          UI_SCALE(30)
+#define SCENE_W          UI_SCALE(580)
+#define SCENE_H          UI_SCALE(326)
+#define BOX_X            UI_SCALE(50)
+#define BOX_Y            UI_SCALE(366)
+#define BOX_W            UI_SCALE(540)
+#define BOX_H            UI_SCALE(80)
+#define TEXT_PAD_X       UI_SCALE(10)
+#define TEXT_PAD_Y       UI_SCALE(10)
+#define HEART_SIZE       UI_SCALE(30)
+#define HEART_MARGIN     UI_SCALE(8)
 #define TYPEWRITER_MS    40   // ms per character
 
 // Venetian blind settings
 #define BLIND_COUNT      100    // number of horizontal bars
-#define BLIND_SPEED      2     // pixels per step each bar grows
+#define BLIND_SPEED      UI_SCALE(2)     // pixels per step each bar grows
 #define BLIND_STEP_MS    100    // ms between each step (higher = slower)
 
 typedef enum {
@@ -79,6 +83,7 @@ typedef struct {
     SDL_Texture*  tex_box;
     SDL_Texture*  tex_heart;
     SDL_Texture*  tex_menubg;
+    SDL_Texture*  tex_crt_canvas;
 
     TTF_Font*     font;
     SDL_Color     text_color;
@@ -118,6 +123,8 @@ typedef struct {
     int           menu_selected;
     bool          audio_enabled;
     bool          fullscreen_enabled;
+    bool          crt_enabled;
+    bool          crt_target_supported;
 } View;
 
 int  view_init(View* v, const char* font_path, int font_size);

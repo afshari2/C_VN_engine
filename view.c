@@ -16,6 +16,10 @@ static const SDL_Color UI_PATREON_FILL    = {255, 103, 30, 250};
 static const SDL_Color UI_PATREON_HOT     = {255, 128, 48, 255};
 static const SDL_Color UI_PATREON_BORDER  = {255, 224, 182, 255};
 static const SDL_Color UI_PATREON_TEXT    = {255, 255, 255, 255};
+static const SDL_Color CRT_EDGE_DARK      = {0, 0, 0, 28};
+static const SDL_Color CRT_SCANLINE       = {0, 0, 0, 54};
+static const SDL_Color CRT_MASK_DARK      = {0, 0, 0, 30};
+static const SDL_Color CRT_HIGHLIGHT      = {255, 248, 214, 18};
 
 // ── Helpers ──────────────────────────────────
 
@@ -31,6 +35,105 @@ static int blind_max_h(void) {
 
 static void set_draw_color(SDL_Renderer* renderer, SDL_Color color) {
     SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+}
+
+static int ui_scale(int value) {
+    return UI_SCALE(value);
+}
+
+static bool begin_crt_canvas(View* v) {
+    if (!v->crt_enabled || !v->crt_target_supported || !v->tex_crt_canvas)
+        return false;
+
+    if (SDL_SetRenderTarget(v->renderer, v->tex_crt_canvas) != 0)
+        return false;
+
+    SDL_SetRenderDrawBlendMode(v->renderer, SDL_BLENDMODE_NONE);
+    SDL_SetRenderDrawColor(v->renderer, 0, 0, 0, 255);
+    SDL_RenderClear(v->renderer);
+    return true;
+}
+
+static void render_crt_overlay(View* v) {
+    SDL_SetRenderDrawBlendMode(v->renderer, SDL_BLENDMODE_BLEND);
+
+    for (int y = ui_scale(1); y < WIN_H; y += ui_scale(2)) {
+        set_draw_color(v->renderer, CRT_SCANLINE);
+        SDL_Rect line = {0, y, WIN_W, ui_scale(1)};
+        SDL_RenderFillRect(v->renderer, &line);
+    }
+
+    for (int x = 0; x < WIN_W; x += ui_scale(3)) {
+        set_draw_color(v->renderer, CRT_MASK_DARK);
+        SDL_Rect mask = {x, 0, ui_scale(1), WIN_H};
+        SDL_RenderFillRect(v->renderer, &mask);
+    }
+
+    set_draw_color(v->renderer, CRT_HIGHLIGHT);
+    SDL_RenderDrawLine(v->renderer, ui_scale(8), ui_scale(7),
+                       WIN_W - ui_scale(9), ui_scale(7));
+    SDL_RenderDrawLine(v->renderer, ui_scale(7), ui_scale(8),
+                       ui_scale(7), WIN_H - ui_scale(9));
+
+    for (int i = 0; i < ui_scale(28); i++) {
+        Uint8 alpha = (Uint8)(42 - i * UI_SCALE_DEN / UI_SCALE_NUM);
+        set_draw_color(v->renderer, (SDL_Color){0, 0, 0, alpha});
+        SDL_Rect top = {i, i, WIN_W - i * 2, ui_scale(1)};
+        SDL_Rect bottom = {i, WIN_H - i - ui_scale(1), WIN_W - i * 2, ui_scale(1)};
+        SDL_Rect left = {i, i, ui_scale(1), WIN_H - i * 2};
+        SDL_Rect right = {WIN_W - i - ui_scale(1), i, ui_scale(1), WIN_H - i * 2};
+        SDL_RenderFillRect(v->renderer, &top);
+        SDL_RenderFillRect(v->renderer, &bottom);
+        SDL_RenderFillRect(v->renderer, &left);
+        SDL_RenderFillRect(v->renderer, &right);
+    }
+
+    set_draw_color(v->renderer, CRT_EDGE_DARK);
+    SDL_Rect border = {0, 0, WIN_W, WIN_H};
+    SDL_RenderDrawRect(v->renderer, &border);
+    SDL_SetRenderDrawBlendMode(v->renderer, SDL_BLENDMODE_NONE);
+}
+
+static void present_crt_canvas(View* v, bool using_canvas) {
+    if (!using_canvas) {
+        SDL_RenderPresent(v->renderer);
+        return;
+    }
+
+    SDL_SetRenderTarget(v->renderer, NULL);
+    SDL_SetRenderDrawBlendMode(v->renderer, SDL_BLENDMODE_NONE);
+    SDL_SetRenderDrawColor(v->renderer, 0, 0, 0, 255);
+    SDL_RenderClear(v->renderer);
+
+    SDL_Rect full = {0, 0, WIN_W, WIN_H};
+    SDL_Rect glow = {-ui_scale(2), -ui_scale(2),
+                     WIN_W + ui_scale(4), WIN_H + ui_scale(4)};
+
+    SDL_SetTextureBlendMode(v->tex_crt_canvas, SDL_BLENDMODE_BLEND);
+    SDL_SetTextureColorMod(v->tex_crt_canvas, 255, 255, 255);
+    SDL_SetTextureAlphaMod(v->tex_crt_canvas, 54);
+    SDL_RenderCopy(v->renderer, v->tex_crt_canvas, NULL, &glow);
+
+    SDL_SetTextureAlphaMod(v->tex_crt_canvas, 255);
+    SDL_RenderCopy(v->renderer, v->tex_crt_canvas, NULL, &full);
+
+    SDL_SetTextureBlendMode(v->tex_crt_canvas, SDL_BLENDMODE_ADD);
+    SDL_SetTextureAlphaMod(v->tex_crt_canvas, 44);
+
+    SDL_SetTextureColorMod(v->tex_crt_canvas, 255, 32, 32);
+    SDL_Rect red = {-ui_scale(1), 0, WIN_W, WIN_H};
+    SDL_RenderCopy(v->renderer, v->tex_crt_canvas, NULL, &red);
+
+    SDL_SetTextureColorMod(v->tex_crt_canvas, 32, 64, 255);
+    SDL_Rect blue = {ui_scale(1), 0, WIN_W, WIN_H};
+    SDL_RenderCopy(v->renderer, v->tex_crt_canvas, NULL, &blue);
+
+    SDL_SetTextureBlendMode(v->tex_crt_canvas, SDL_BLENDMODE_BLEND);
+    SDL_SetTextureColorMod(v->tex_crt_canvas, 255, 255, 255);
+    SDL_SetTextureAlphaMod(v->tex_crt_canvas, 255);
+
+    render_crt_overlay(v);
+    SDL_RenderPresent(v->renderer);
 }
 
 // ── Asset loaders ────────────────────────────
@@ -91,6 +194,29 @@ int view_init(View* v, const char* font_path, int font_size) {
     v->tex_bg       = NULL;
     v->tex_sprite   = NULL;
     v->tex_next_sprite = NULL;
+    v->tex_crt_canvas = NULL;
+    v->crt_enabled = true;
+    SDL_RendererInfo renderer_info;
+    if (SDL_GetRendererInfo(v->renderer, &renderer_info) == 0) {
+        v->crt_target_supported =
+            (renderer_info.flags & SDL_RENDERER_TARGETTEXTURE) != 0;
+    } else {
+        v->crt_target_supported = false;
+    }
+
+    if (v->crt_target_supported) {
+        v->tex_crt_canvas = SDL_CreateTexture(
+            v->renderer,
+            SDL_PIXELFORMAT_RGBA8888,
+            SDL_TEXTUREACCESS_TARGET,
+            WIN_W,
+            WIN_H
+        );
+        if (!v->tex_crt_canvas) {
+            fprintf(stderr, "[View] CRT canvas unavailable: %s\n", SDL_GetError());
+            v->crt_target_supported = false;
+        }
+    }
 
     v->font = TTF_OpenFont(font_path, font_size);
     if (!v->font) { fprintf(stderr, "[View] Font: %s\n", TTF_GetError()); return 1; }
@@ -286,11 +412,11 @@ void view_set_status(View* v, const char* text) {
 }
 
 ViewCommand view_command_at(int x, int y) {
-    const int button_y = 452;
-    const int button_w = 90;
-    const int button_h = 20;
-    const int gap = 8;
-    const int first_x = 50;
+    const int button_y = ui_scale(452);
+    const int button_w = ui_scale(90);
+    const int button_h = ui_scale(20);
+    const int gap = ui_scale(8);
+    const int first_x = BOX_X;
 
     if (y < button_y || y >= button_y + button_h)
         return VIEW_COMMAND_NONE;
@@ -323,10 +449,10 @@ void view_set_menu_state(View* v, int selected, bool audio_enabled,
 
 ViewMenuAction view_menu_action_at(const View* v, int x, int y) {
     int count = v->screen == VIEW_SCREEN_SETTINGS ? 3 : 5;
-    int box_x = 190;
-    int box_y = v->screen == VIEW_SCREEN_SETTINGS ? 176 : 160;
-    int box_w = 260;
-    int row_h = 34;
+    int box_x = ui_scale(190);
+    int box_y = v->screen == VIEW_SCREEN_SETTINGS ? ui_scale(176) : ui_scale(160);
+    int box_w = ui_scale(260);
+    int row_h = ui_scale(34);
 
     if (x < box_x || x >= box_x + box_w ||
         y < box_y || y >= box_y + count * row_h) {
@@ -523,9 +649,9 @@ static SDL_Rect sprite_rect_for(View* v, SDL_Texture* texture) {
 
     int sprite_x = SCENE_X + (SCENE_W - sprite_w) / 2;
     if (strcmp(v->sprite_pos, "left") == 0)
-        sprite_x = SCENE_X + 28;
+        sprite_x = SCENE_X + ui_scale(28);
     else if (strcmp(v->sprite_pos, "right") == 0)
-        sprite_x = SCENE_X + SCENE_W - sprite_w - 28;
+        sprite_x = SCENE_X + SCENE_W - sprite_w - ui_scale(28);
 
     sprite_rect.x = sprite_x;
     sprite_rect.y = SCENE_Y + SCENE_H - sprite_h;
@@ -602,16 +728,21 @@ static void render_choice_box(View* v) {
     if (!v->choices_visible || v->choice_count <= 0 || view_is_transitioning(v))
         return;
 
-    int row_h = 24;
-    int box_w = 430;
-    int box_h = 20 + row_h * v->choice_count;
+    int row_h = ui_scale(24);
+    int box_w = ui_scale(430);
+    int box_h = ui_scale(20) + row_h * v->choice_count;
     SDL_Rect outer = {
         SCENE_X + (SCENE_W - box_w) / 2,
-        SCENE_Y + SCENE_H - box_h - 18,
+        SCENE_Y + SCENE_H - box_h - ui_scale(18),
         box_w,
         box_h
     };
-    SDL_Rect inner = {outer.x + 3, outer.y + 3, outer.w - 6, outer.h - 6};
+    SDL_Rect inner = {
+        outer.x + ui_scale(3),
+        outer.y + ui_scale(3),
+        outer.w - ui_scale(6),
+        outer.h - ui_scale(6)
+    };
 
     SDL_SetRenderDrawBlendMode(v->renderer, SDL_BLENDMODE_BLEND);
     set_draw_color(v->renderer, UI_PANEL_FILL);
@@ -622,11 +753,16 @@ static void render_choice_box(View* v) {
     SDL_RenderDrawRect(v->renderer, &outer);
 
     for (int i = 0; i < v->choice_count; i++) {
-        int y = inner.y + 9 + i * row_h;
+        int y = inner.y + ui_scale(9) + i * row_h;
         SDL_Color color = i == v->choice_selected ? UI_TEXT_HOT : UI_TEXT;
 
         if (i == v->choice_selected) {
-            SDL_Rect marker = {inner.x + 14, y + 5, 8, 8};
+            SDL_Rect marker = {
+                inner.x + ui_scale(14),
+                y + ui_scale(5),
+                ui_scale(8),
+                ui_scale(8)
+            };
             set_draw_color(v->renderer, UI_TEXT_HOT);
             SDL_RenderFillRect(v->renderer, &marker);
         }
@@ -634,7 +770,7 @@ static void render_choice_box(View* v) {
         SDL_Surface* s = TTF_RenderText_Blended(v->font, v->choice_text[i], color);
         if (s) {
             SDL_Texture* t = SDL_CreateTextureFromSurface(v->renderer, s);
-            SDL_Rect r = {inner.x + 34, y, s->w, s->h};
+            SDL_Rect r = {inner.x + ui_scale(34), y, s->w, s->h};
             SDL_RenderCopy(v->renderer, t, NULL, &r);
             SDL_DestroyTexture(t);
             SDL_FreeSurface(s);
@@ -660,8 +796,13 @@ static void render_text_at(View* v, const char* text, int x, int y, SDL_Color co
 static void render_command_button_style(View* v, int x, int y, const char* label,
                                         SDL_Color fill, SDL_Color border,
                                         SDL_Color text) {
-    SDL_Rect outer = {x, y, 90, 20};
-    SDL_Rect inner = {x + 2, y + 2, 86, 16};
+    SDL_Rect outer = {x, y, ui_scale(90), ui_scale(20)};
+    SDL_Rect inner = {
+        x + ui_scale(2),
+        y + ui_scale(2),
+        ui_scale(86),
+        ui_scale(16)
+    };
 
     SDL_SetRenderDrawBlendMode(v->renderer, SDL_BLENDMODE_BLEND);
     set_draw_color(v->renderer, UI_PANEL_FILL);
@@ -671,7 +812,7 @@ static void render_command_button_style(View* v, int x, int y, const char* label
     set_draw_color(v->renderer, border);
     SDL_RenderDrawRect(v->renderer, &outer);
 
-    render_text_at(v, label, x + 8, y + 1, text);
+    render_text_at(v, label, x + ui_scale(8), y + ui_scale(1), text);
     SDL_SetRenderDrawBlendMode(v->renderer, SDL_BLENDMODE_NONE);
 }
 
@@ -686,22 +827,27 @@ static void render_patreon_command_button(View* v, int x, int y) {
 }
 
 static void render_command_strip(View* v) {
-    const int y = 452;
+    const int y = ui_scale(452);
 
-    render_command_button(v, 50, y, "F5 SAVE");
-    render_command_button(v, 148, y, "F9 LOAD");
-    render_command_button(v, 246, y, "BS BACK");
-    render_patreon_command_button(v, 344, y);
+    render_command_button(v, ui_scale(50), y, "F5 SAVE");
+    render_command_button(v, ui_scale(148), y, "F9 LOAD");
+    render_command_button(v, ui_scale(246), y, "BS BACK");
+    render_patreon_command_button(v, ui_scale(344), y);
 
     if (v->status_text[0] && SDL_GetTicks() < v->status_until) {
-        render_text_at(v, v->status_text, 454, y + 1, UI_STATUS_TEXT);
+        render_text_at(v, v->status_text, ui_scale(454), y + ui_scale(1), UI_STATUS_TEXT);
     }
 }
 
 static void render_menu_row_style(View* v, int x, int y, int w, const char* label,
                                   bool selected, bool patreon) {
-    SDL_Rect outer = {x, y, w, 28};
-    SDL_Rect inner = {x + 3, y + 3, w - 6, 22};
+    SDL_Rect outer = {x, y, w, ui_scale(28)};
+    SDL_Rect inner = {
+        x + ui_scale(3),
+        y + ui_scale(3),
+        w - ui_scale(6),
+        ui_scale(22)
+    };
     SDL_Color text = patreon ? UI_PATREON_TEXT : (selected ? UI_TEXT_HOT : UI_TEXT);
     SDL_Color fill = patreon ?
         (selected ? UI_PATREON_HOT : UI_PATREON_FILL) :
@@ -717,12 +863,17 @@ static void render_menu_row_style(View* v, int x, int y, int w, const char* labe
     SDL_RenderDrawRect(v->renderer, &outer);
 
     if (selected) {
-        SDL_Rect marker = {x + 13, y + 10, 8, 8};
+        SDL_Rect marker = {
+            x + ui_scale(13),
+            y + ui_scale(10),
+            ui_scale(8),
+            ui_scale(8)
+        };
         set_draw_color(v->renderer, patreon ? UI_PATREON_TEXT : UI_TEXT_HOT);
         SDL_RenderFillRect(v->renderer, &marker);
     }
 
-    render_text_at(v, label, x + 32, y + 4, text);
+    render_text_at(v, label, x + ui_scale(32), y + ui_scale(4), text);
     SDL_SetRenderDrawBlendMode(v->renderer, SDL_BLENDMODE_NONE);
 }
 
@@ -749,28 +900,30 @@ static void render_menu_screen(View* v) {
     set_draw_color(v->renderer, UI_PANEL_FILL);
     SDL_RenderDrawRect(v->renderer, &scene);
 
-    render_text_at(v, "A CAT IN GIRLS DORMITORY", 148, 82, UI_TEXT_HOT);
-    render_text_at(v, "C VISUAL NOVEL ENGINE", 205, 112, UI_TEXT);
+    render_text_at(v, "A CAT IN GIRLS DORMITORY", ui_scale(148), ui_scale(82), UI_TEXT_HOT);
+    render_text_at(v, "C VISUAL NOVEL ENGINE", ui_scale(205), ui_scale(112), UI_TEXT);
 
-    int x = 190;
-    int y = 160;
-    int w = 260;
+    int x = ui_scale(190);
+    int y = ui_scale(160);
+    int w = ui_scale(260);
     const char* labels[] = {"NEW GAME", "LOAD", "SETTINGS", "PATREON", "QUIT"};
     for (int i = 0; i < 5; i++) {
         if (i == 3)
-            render_patreon_menu_row(v, x, y + i * 34, w, v->menu_selected == i);
+            render_patreon_menu_row(v, x, y + i * ui_scale(34), w, v->menu_selected == i);
         else
-            render_menu_row(v, x, y + i * 34, w, labels[i], v->menu_selected == i);
+            render_menu_row(v, x, y + i * ui_scale(34), w, labels[i], v->menu_selected == i);
     }
 
     if (v->status_text[0] && SDL_GetTicks() < v->status_until) {
-        render_text_at(v, v->status_text, 238, 334, UI_STATUS_TEXT);
+        render_text_at(v, v->status_text, ui_scale(238), ui_scale(334), UI_STATUS_TEXT);
     }
 
     SDL_Rect box_rect = {BOX_X, BOX_Y, BOX_W, BOX_H};
     SDL_RenderCopy(v->renderer, v->tex_box, NULL, &box_rect);
-    render_text_at(v, "ARROWS/W/S SELECT    ENTER CONFIRM", BOX_X + 22, BOX_Y + 18, v->text_color);
-    render_text_at(v, "PC-98 STYLE MODE", BOX_X + 22, BOX_Y + 44, v->text_color);
+    render_text_at(v, "ARROWS/W/S SELECT    ENTER CONFIRM",
+                   BOX_X + ui_scale(22), BOX_Y + ui_scale(18), v->text_color);
+    render_text_at(v, "PC-98 STYLE MODE",
+                   BOX_X + ui_scale(22), BOX_Y + ui_scale(44), v->text_color);
 }
 
 static void render_settings_screen(View* v) {
@@ -786,8 +939,8 @@ static void render_settings_screen(View* v) {
     set_draw_color(v->renderer, UI_PANEL_FILL);
     SDL_RenderDrawRect(v->renderer, &scene);
 
-    render_text_at(v, "SETTINGS", 276, 110, UI_TEXT_HOT);
-    render_text_at(v, "DISPLAY / AUDIO", 238, 144, UI_TEXT);
+    render_text_at(v, "SETTINGS", ui_scale(276), ui_scale(110), UI_TEXT_HOT);
+    render_text_at(v, "DISPLAY / AUDIO", ui_scale(238), ui_scale(144), UI_TEXT);
 
     char audio_label[64];
     snprintf(audio_label, sizeof(audio_label), "AUDIO: %s",
@@ -796,31 +949,37 @@ static void render_settings_screen(View* v) {
     snprintf(fullscreen_label, sizeof(fullscreen_label), "FULLSCREEN: %s",
              v->fullscreen_enabled ? "ON" : "OFF");
 
-    render_menu_row(v, 190, 176, 260, audio_label, v->menu_selected == 0);
-    render_menu_row(v, 190, 210, 260, fullscreen_label, v->menu_selected == 1);
-    render_menu_row(v, 190, 244, 260, "BACK", v->menu_selected == 2);
+    render_menu_row(v, ui_scale(190), ui_scale(176), ui_scale(260), audio_label, v->menu_selected == 0);
+    render_menu_row(v, ui_scale(190), ui_scale(210), ui_scale(260), fullscreen_label, v->menu_selected == 1);
+    render_menu_row(v, ui_scale(190), ui_scale(244), ui_scale(260), "BACK", v->menu_selected == 2);
 
     if (v->status_text[0] && SDL_GetTicks() < v->status_until) {
-        render_text_at(v, v->status_text, 246, 286, UI_STATUS_TEXT);
+        render_text_at(v, v->status_text, ui_scale(246), ui_scale(286), UI_STATUS_TEXT);
     }
 
     SDL_Rect box_rect = {BOX_X, BOX_Y, BOX_W, BOX_H};
     SDL_RenderCopy(v->renderer, v->tex_box, NULL, &box_rect);
-    render_text_at(v, "ENTER TO TOGGLE    ESC/BACKSPACE BACK", BOX_X + 22, BOX_Y + 28, v->text_color);
+    render_text_at(v, "ENTER TO TOGGLE    ESC/BACKSPACE BACK",
+                   BOX_X + ui_scale(22), BOX_Y + ui_scale(28), v->text_color);
 }
 
 void view_render(View* v) {
-    SDL_RenderClear(v->renderer);
+    bool using_crt_canvas = begin_crt_canvas(v);
+    if (!using_crt_canvas) {
+        SDL_SetRenderDrawBlendMode(v->renderer, SDL_BLENDMODE_NONE);
+        SDL_SetRenderDrawColor(v->renderer, 0, 0, 0, 255);
+        SDL_RenderClear(v->renderer);
+    }
 
     if (v->screen == VIEW_SCREEN_MENU) {
         render_menu_screen(v);
-        SDL_RenderPresent(v->renderer);
+        present_crt_canvas(v, using_crt_canvas);
         return;
     }
 
     if (v->screen == VIEW_SCREEN_SETTINGS) {
         render_settings_screen(v);
-        SDL_RenderPresent(v->renderer);
+        present_crt_canvas(v, using_crt_canvas);
         return;
     }
 
@@ -901,7 +1060,7 @@ void view_render(View* v) {
                     SDL_DestroyTexture(t);
                     SDL_FreeSurface(s);
                 }
-                draw_y += line_h + 2;
+                draw_y += line_h + ui_scale(2);
                 snprintf(line_buf, sizeof(line_buf), "%s", word);
             } else {
                 snprintf(line_buf, sizeof(line_buf), "%s", test);
@@ -934,7 +1093,7 @@ void view_render(View* v) {
     render_choice_box(v);
     render_command_strip(v);
 
-    SDL_RenderPresent(v->renderer);
+    present_crt_canvas(v, using_crt_canvas);
 }
 
 // ── Cleanup ──────────────────────────────────
@@ -943,6 +1102,7 @@ void view_free(View* v) {
     if (v->tex_heart)    SDL_DestroyTexture(v->tex_heart);
     if (v->tex_menubg)   SDL_DestroyTexture(v->tex_menubg);
     if (v->tex_next_sprite) SDL_DestroyTexture(v->tex_next_sprite);
+    if (v->tex_crt_canvas) SDL_DestroyTexture(v->tex_crt_canvas);
     if (v->tex_sprite)   SDL_DestroyTexture(v->tex_sprite);
     if (v->tex_bg)       SDL_DestroyTexture(v->tex_bg);
     if (v->tex_box)      SDL_DestroyTexture(v->tex_box);

@@ -40,7 +40,7 @@ int main(int argc, char* argv[]) {
 
     // ── View ─────────────────────────────────────
     View view;
-    if (view_init(&view, "assets/fonts/flexi.ttf", 18) != 0) return 1;
+    if (view_init(&view, "assets/fonts/flexi.ttf", UI_SCALE(18)) != 0) return 1;
 
     // ── Controller ───────────────────────────────
     Controller controller;

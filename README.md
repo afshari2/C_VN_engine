@@ -195,8 +195,8 @@ Settings currently includes an `AUDIO: ON/OFF` toggle. The project does not have
 an audio mixer yet, so this is stored as player preference data for the audio
 system to read once music and sound effects are added.
 
-Settings also includes `FULLSCREEN: ON/OFF`. The game still renders internally at
-`640x480`; SDL scales that logical canvas to the current window or desktop
+Settings also includes `FULLSCREEN: ON/OFF`. The game renders internally at
+`1440x1080`; SDL scales that logical canvas to the current window or desktop
 fullscreen size while preserving the 4:3 aspect ratio.
 
 ## Project Layout
